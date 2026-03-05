@@ -1,0 +1,23 @@
+version: "3.9"
+name: collab-notes
+
+services:
+  main-pg-db: 
+    image: postgres:15
+    container_name: postgres-collab-notes
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: collab-notes
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+    networks:
+      - backend-network
+
+networks:
+  frontend-network:
+    driver: bridge
+  backend-network:
+    driver: bridge
