@@ -7,6 +7,7 @@ exports.up = (pgm) => {
         id: {
             type: "uuid",
             primaryKey: true,
+            default: pgm.func("gen_random_uuid()"),
         },
         note_id: {
             type: "uuid",
@@ -22,22 +23,26 @@ exports.up = (pgm) => {
             type: "integer",
             notNull: true,
         },
+        is_checkpoint: {
+            type: "boolean",
+            default: false,
+        },
         created_by: {
             type: "uuid",
             references: "users(id)",
         },
         created_at: {
-            type: "timestamp",
+            type: "timestamptz",
             default: pgm.func("NOW()"),
         },
     });
 
-    pgm.createIndex("note_versions", "note_id", {
-        name: "idx_versions_note_id",
+    pgm.createIndex("note_versions", ["note_id", "version"], {
+        name: "idx_versions_note_version",
     });
 };
 
 exports.down = (pgm) => {
-    pgm.dropIndex("note_versions", "note_id", { name: "idx_versions_note_id" });
+    pgm.dropIndex("note_versions", ["note_id", "version"], { name: "idx_versions_note_version" });
     pgm.dropTable("note_versions");
 };

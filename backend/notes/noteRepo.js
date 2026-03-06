@@ -17,11 +17,23 @@ exports.getNoteById = async (id) => {
 
 exports.getAllNotes = async ({ ownerId, limit = 20, offset = 0 }) => {
     const result = await pool.query(
-        `SELECT * FROM notes
+        `SELECT id, title, content, version, updated_at FROM notes
      WHERE owner_id = $1
      ORDER BY updated_at DESC
      LIMIT $2 OFFSET $3`,
         [ownerId, limit, offset]
+    );
+    return result.rows;
+};
+
+exports.getAllNotesByCollaboratorId = async ({ collaboratorId, limit = 20, offset = 0 }) => {
+    const result = await pool.query(
+        `SELECT a.id, a.title, a.content, a.version, a.updated_at FROM notes a
+     JOIN note_collaborators b ON a.id = b.note_id
+     WHERE b.user_id = $1
+     ORDER BY a.updated_at DESC
+     LIMIT $2 OFFSET $3`,
+        [collaboratorId, limit, offset]
     );
     return result.rows;
 };

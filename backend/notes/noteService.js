@@ -1,16 +1,15 @@
 const crypto = require("crypto");
 const noteRepo = require("./noteRepo");
+const userRepo = require("../user/userRepo");
 
 exports.createNote = async (req, res, next) => {
     try {
         const { title, content } = req.body;
         const ownerId = req.body.owner_id;
 
-        if (!content) {
-            return res.status(400).json({ error: "content is required" });
-        }
-        if (!ownerId) {
-            return res.status(400).json({ error: "owner_id is required" });
+        const user = await userRepo.getUserById(ownerId);
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
         }
 
         const note = await noteRepo.createNote({

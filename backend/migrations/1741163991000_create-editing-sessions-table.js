@@ -7,11 +7,16 @@ exports.up = (pgm) => {
         id: {
             type: "uuid",
             primaryKey: true,
+            default: pgm.func("gen_random_uuid()"),
         },
         note_id: {
             type: "uuid",
             references: "notes(id)",
             onDelete: "CASCADE",
+            notNull: true,
+        },
+        last_acknowledged_version: {
+            type: "integer",
             notNull: true,
         },
         user_id: {
@@ -20,7 +25,7 @@ exports.up = (pgm) => {
             notNull: true,
         },
         last_active: {
-            type: "timestamp",
+            type: "timestamptz",
             default: pgm.func("NOW()"),
         },
     });

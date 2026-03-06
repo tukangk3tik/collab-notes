@@ -1,12 +1,19 @@
+require('dotenv').config();
+
 const express = require("express");
+const cors = require("cors");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./swagger/config");
 const noteService = require("./notes/noteService");
 const userService = require("./user/userService");
+const authService = require("./user/authService");
+const validateMiddleware = require("./common/middleware/validation-middleware");
+const postNoteSchema = require("./notes/schema/post-note.schema");
 
 const app = express();
 const appPort = 3001;
 
+app.use(cors());
 app.use(express.json());
 
 // Swagger UI
@@ -17,18 +24,28 @@ app.get("/", (_, res) => {
 });
 
 // Notes CRUD
-app.post("/notes", noteService.createNote);
+app.post("/notes", validateMiddleware(postNoteSchema), noteService.createNote);
 app.get("/notes", noteService.getAllNotes);
 app.get("/notes/:id", noteService.getNoteById);
-app.put("/notes/:id", noteService.updateNote);
 app.delete("/notes/:id", noteService.deleteNote);
 
 // Users CRUD
 app.post("/users", userService.createUser);
 app.get("/users", userService.getAllUsers);
 app.get("/users/:id", userService.getUserById);
-app.put("/users/:id", userService.updateUser);
 app.delete("/users/:id", userService.deleteUser);
+
+// Auth
+app.post("/auth/signin", authService.signIn);
+
+// Collaborators
+// app.post("/notes/:id/collaborators", noteService.addCollaborator);
+// app.delete("/notes/:id/collaborators/:userId", noteService.removeCollaborator);
+// app.get("/notes/:id/collaborators", noteService.getCollaborators);
+// 
+// // Operations
+// app.post("/notes/:id/operations", noteService.applyOperation);
+// app.get("/notes/:id/operations", noteService.getOperations);
 
 // Global error handler
 app.use((err, _req, res, _next) => {
@@ -37,5 +54,6 @@ app.use((err, _req, res, _next) => {
 });
 
 app.listen(appPort, () => {
-    console.log(`Server started on port ${appPort}`);
+    console.log(`Timezone set: ${process.env.TZ}`);
+    console.log(`Server started on port: ${appPort}`);
 });

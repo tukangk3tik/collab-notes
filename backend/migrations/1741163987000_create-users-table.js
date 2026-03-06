@@ -7,6 +7,7 @@ exports.up = (pgm) => {
     id: {
       type: "uuid",
       primaryKey: true,
+      default: pgm.func("gen_random_uuid()"),
     },
     name: {
       type: "text",
@@ -18,7 +19,7 @@ exports.up = (pgm) => {
       unique: true,
     },
     created_at: {
-      type: "timestamp",
+      type: "timestamptz",
       default: pgm.func("NOW()"),
     },
   });

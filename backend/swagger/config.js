@@ -16,6 +16,13 @@ const options = {
         ],
         components: {
             schemas: {
+                SignInRequest: {
+                    type: "object",
+                    required: ["email"],
+                    properties: {
+                        email: { type: "string", format: "email", example: "[EMAIL_ADDRESS]" },
+                    },
+                },
                 User: {
                     type: "object",
                     properties: {

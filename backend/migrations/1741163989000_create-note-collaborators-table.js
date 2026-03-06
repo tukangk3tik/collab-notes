@@ -4,7 +4,7 @@
 
 exports.up = (pgm) => {
     // Create enum type for collaborator roles
-    pgm.createType("collaborator_role", ["owner", "editor", "viewer"]);
+    pgm.createType("collaborator_role", ["owner", "editor", "viewer"], { ifNotExists: true });
 
     pgm.createTable("note_collaborators", {
         note_id: {
@@ -23,7 +23,7 @@ exports.up = (pgm) => {
             default: "editor",
         },
         added_at: {
-            type: "timestamp",
+            type: "timestamptz",
             default: pgm.func("NOW()"),
         },
     });
@@ -40,5 +40,5 @@ exports.up = (pgm) => {
 exports.down = (pgm) => {
     pgm.dropIndex("note_collaborators", "user_id", { name: "idx_collab_user" });
     pgm.dropTable("note_collaborators");
-    pgm.dropType("collaborator_role");
+    pgm.dropType("collaborator_role", { ifExists: true });
 };
