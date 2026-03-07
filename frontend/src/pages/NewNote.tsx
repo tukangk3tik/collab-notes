@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { useAuth } from '@/context/AuthContext'
-import { noteService } from '@/services/noteAPI'
 import { toast } from 'sonner'
+import { useNotes } from '@/context/NotesContext'
 
 export default function NewNote() {
     const navigate = useNavigate()
@@ -15,13 +15,14 @@ export default function NewNote() {
     const [content, setContent] = useState('')
     const [isSaving, setIsSaving] = useState(false)
     const auth = useAuth()
+    const { createNote } = useNotes()
 
     const handleSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault()
         setIsSaving(true)
 
         try {
-            await noteService.createNote({
+            await createNote({
                 title,
                 content,
                 owner_id: auth.user!.id,

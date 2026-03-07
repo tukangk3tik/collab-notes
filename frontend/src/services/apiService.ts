@@ -1,8 +1,8 @@
 const BASE_URL = import.meta.env.VITE_API_KEY;
 
-export async function client(endpoint: string, { body, ...customConfig }: any = {}) {
+export async function client<T = any>(endpoint: string, { body, ...customConfig }: any = {}): Promise<T> {
   const headers = { 'Content-Type': 'application/json' };
-  
+
   const config = {
     method: body ? 'POST' : 'GET',
     ...customConfig,
@@ -24,7 +24,7 @@ export async function client(endpoint: string, { body, ...customConfig }: any = 
   } else {
     // Global Error Handling (Infrastruktur)
     if (response.status === 401) {
-       window.location.href = '/login';
+      window.location.href = '/login';
     }
     // Lempar pesan error agar ditangkap 'catch' di komponen
     return Promise.reject(data.message || 'Terjadi kesalahan sistem');

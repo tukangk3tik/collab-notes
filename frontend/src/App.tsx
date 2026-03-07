@@ -6,6 +6,7 @@ import NoteEditor from '@/pages/NoteEditor'
 import NewNote from '@/pages/NewNote'
 import SignIn from '@/pages/SignIn'
 import ShareWithMe from './pages/ShareWithMe'
+import { NotesProvider } from './context/NotesContext'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth()
@@ -29,7 +30,9 @@ function AppRoutes() {
       <Route
         element={
           <ProtectedRoute>
-            <Layout />
+            <NotesProvider>
+              <Layout />
+            </NotesProvider>
           </ProtectedRoute>
         }
       >

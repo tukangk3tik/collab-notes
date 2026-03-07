@@ -6,17 +6,9 @@ import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/context/AuthContext'
-
-const MOCK_NOTES = [
-    { id: '1', title: 'Project Roadmap', updated: '2 min ago' },
-    { id: '2', title: 'Meeting Notes – Sprint 12', updated: '1 hr ago' },
-    { id: '3', title: 'API Design Document', updated: '3 hrs ago' },
-]
-
-const MOCK_SHARED_NOTES = [
-    { id: '4', title: 'Bug Triage List', updated: 'Yesterday' },
-    { id: '5', title: 'Onboarding Guide', updated: '2 days ago' },
-]
+import { useNotes } from '@/context/NotesContext'
+import { Spinner } from './ui/spinner'
+import { timeAgo } from '@/lib/timeAgo'
 
 const NAV_ITEMS = [
     { to: '/', icon: Clock, label: 'Recent' },
@@ -29,6 +21,7 @@ export default function Sidebar() {
     const location = useLocation()
     const navigate = useNavigate()
     const { user, signOut } = useAuth()
+    const { notes, loading } = useNotes()
 
     return (
         <aside className="flex h-screen w-[280px] flex-col border-r border-border bg-sidebar shrink-0">
@@ -86,29 +79,37 @@ export default function Sidebar() {
                 <span className="block px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                     My Notes
                 </span>
-                <ul className="space-y-0.5">
-                    {MOCK_NOTES.map((note) => {
+
+                {loading
+                    ? <div className="flex items-center mt-4 ms-3">
+                        <Spinner />
+                    </div>
+                    : notes.length > 0 ? notes.map((note) => {
                         const isActive = location.pathname === `/notes/${note.id}`
                         return (
-                            <li key={note.id}>
-                                <Link
-                                    to={`/notes/${note.id}`}
-                                    className={cn(
-                                        'flex items-center gap-3 rounded-md px-3 py-1.5 transition-colors',
-                                        'hover:bg-accent',
-                                        isActive && 'bg-accent'
-                                    )}
-                                >
-                                    <FileText size={14} className={cn('shrink-0 text-muted-foreground', isActive && 'text-primary')} />
-                                    <div className="flex flex-col min-w-0">
-                                        <span className="text-sm font-medium truncate">{note.title}</span>
-                                        <span className="text-[11px] text-muted-foreground">{note.updated}</span>
-                                    </div>
-                                </Link>
-                            </li>
+                            <ul className="space-y-0.5">
+                                <li key={note.id}>
+                                    <Link
+                                        to={`/notes/${note.id}`}
+                                        className={cn(
+                                            'flex items-center gap-3 rounded-md px-3 py-1.5 transition-colors',
+                                            'hover:bg-accent',
+                                            isActive && 'bg-accent'
+                                        )}
+                                    >
+                                        <FileText size={14} className={cn('shrink-0 text-muted-foreground', isActive && 'text-primary')} />
+                                        <div className="flex flex-col min-w-0">
+                                            <span className="text-sm font-medium truncate">{note.title}</span>
+                                            <span className="text-[11px] text-muted-foreground">{timeAgo(note.updated_at)}</span>
+                                        </div>
+                                    </Link>
+                                </li>
+                            </ul>
                         )
-                    })}
-                </ul>
+                    }) : <div className="flex flex-col mt-4 ms-3">
+                        <span className="text-[11px] text-sm text-muted-foreground">You don't have any note</span>
+                    </div>
+                }
             </div>
 
             {/* Footer */}
@@ -138,6 +139,6 @@ export default function Sidebar() {
                     </div>
                 )}
             </div>
-        </aside>
+        </aside >
     )
 }

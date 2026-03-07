@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
     Bold, Italic, Underline, List, ListOrdered,
@@ -10,21 +10,11 @@ import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-
-const MOCK_NOTES: Record<string, { title: string; content: string; version: number; updatedAt: string }> = {
-    '1': {
-        title: 'Project Roadmap',
-        content: 'This document outlines the Q1 milestones and deliverables for the team.\n\n## Goals\n- Launch MVP by end of February\n- Complete API integration testing\n- Finalize design system components\n- Set up CI/CD pipeline\n\n## Timeline\nWeek 1-2: Core backend development\nWeek 3-4: Frontend integration\nWeek 5-6: Testing & QA\nWeek 7-8: Beta launch & iteration',
-        version: 3,
-        updatedAt: '2 min ago',
-    },
-    '2': {
-        title: 'Meeting Notes – Sprint 12',
-        content: 'Sprint 12 Retrospective\n\n## What went well\n- Completed all planned stories\n- Zero critical bugs in production\n- Great collaboration between frontend and backend teams\n\n## Action items\n- [ ] Set up monitoring dashboards\n- [ ] Review and update API documentation\n- [ ] Plan Sprint 13 scope',
-        version: 5,
-        updatedAt: '1 hr ago',
-    },
-}
+import { useAuth } from '@/context/AuthContext'
+import { noteService } from '@/services/noteAPI'
+import { toast } from 'sonner'
+import type { Note } from '@/types/note'
+import { timeAgo } from '@/lib/timeAgo'
 
 const TOOLBAR_GROUPS = [
     [
@@ -51,10 +41,34 @@ const TOOLBAR_GROUPS = [
 
 export default function NoteEditor() {
     const { id } = useParams<{ id: string }>()
-    const note = MOCK_NOTES[id || '1'] || MOCK_NOTES['1']
+    const [note, setNote] = useState<Note>()
 
-    const [title, setTitle] = useState(note.title)
-    const [content, setContent] = useState(note.content)
+    const [title, setTitle] = useState(note?.title ?? "")
+    const [content, setContent] = useState(note?.content ?? "")
+
+    const [isLoading, setIsLoading] = useState(false)
+    const { getNoteById } = noteService
+    const auth = useAuth()
+
+    const loadNote = async () => {
+        setIsLoading(true)
+        try {
+            const res = await getNoteById(id!, auth.user!.id)
+            setNote(res)
+            setTitle(res.title)
+            setContent(res.content)
+        } catch (err: any) {
+            toast("Failed to load shared note", {
+                description: err,
+            })
+        }
+    }
+
+    useEffect(() => {
+        if (auth.user) {
+            loadNote()
+        }
+    }, [auth.user, id])
 
     return (
         <div className="flex flex-col h-full max-w-3xl mx-auto">
@@ -101,10 +115,10 @@ export default function NoteEditor() {
 
                 <div className="flex items-center gap-2">
                     <Badge variant="outline" className="text-[11px] font-normal">
-                        v{note.version}
+                        v{note?.version}
                     </Badge>
                     <span className="text-[11px] text-muted-foreground whitespace-nowrap">
-                        Edited {note.updatedAt}
+                        Edited {note?.updated_at && timeAgo(note.updated_at)}
                     </span>
                 </div>
             </div>

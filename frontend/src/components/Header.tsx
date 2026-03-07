@@ -1,8 +1,9 @@
-import { useLocation } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
 import { Share2, Users, MoreHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
+import AddCollaboratorDialog from '@/components/AddCollaboratorDialog'
 
 const MOCK_COLLABORATORS = [
     { id: '1', name: 'Alice', color: 'bg-violet-500' },
@@ -12,7 +13,8 @@ const MOCK_COLLABORATORS = [
 
 export default function Header() {
     const location = useLocation()
-    const isEditor = location.pathname.startsWith('/notes/')
+    const params = useParams<{ id: string }>()
+    const isEditor = location.pathname.startsWith('/notes/') && params.id
 
     return (
         <header className="flex h-14 items-center justify-between border-b border-border px-6 bg-background shrink-0">
@@ -43,10 +45,15 @@ export default function Header() {
 
                         <Separator orientation="vertical" className="h-5" />
 
-                        <Button variant="outline" size="sm" className="gap-2 h-8">
-                            <Share2 size={14} />
-                            Share
-                        </Button>
+                        <AddCollaboratorDialog
+                            noteId={params.id!}
+                            trigger={
+                                <Button variant="outline" size="sm" className="gap-2 h-8">
+                                    <Share2 size={14} />
+                                    Share
+                                </Button>
+                            }
+                        />
                     </>
                 )}
 
