@@ -75,6 +75,13 @@
  *           type: string
  *           format: uuid
  *         description: Note ID
+ *       - in: query
+ *         name: user_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: User ID
  *     responses:
  *       200:
  *         description: Note found
@@ -136,6 +143,72 @@
  *         description: Note deleted successfully
  *       404:
  *         description: Note not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ * 
+ * /notes/{id}/collaborators:
+ *   post:
+ *     tags: [Notes]
+ *     summary: Add a collaborator to a note
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Note ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AddCollaboratorRequest'
+ *     responses:
+ *       201:
+ *         description: Note collaborator create successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Note'
+ *       400:
+ *         description: Missing required fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: User or Note are not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *
+ * /shared-notes:
+ *   get:
+ *     tags: [Notes]
+ *     summary: Get shared notes for collaborator
+ *     parameters:
+ *       - in: query
+ *         name: collaborator_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Collaborator's user ID
+ *     responses:
+ *       200:
+ *         description: List of notes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Note'
+ *       400:
+ *         description: Missing required fields
  *         content:
  *           application/json:
  *             schema:

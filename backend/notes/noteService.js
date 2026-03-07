@@ -86,3 +86,61 @@ exports.deleteNote = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.addCollaborator = async (req, res, next) => {
+    try {
+        const note_id = req.params.id;
+        const { email, role } = req.body;
+
+        const note = await noteRepo.getNoteById(note_id);
+        if (!note) {
+            return res.status(404).json({ error: "Note not found" });
+        }
+
+        const user = await userRepo.getUserByEmail(email);
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        const collaborator = await noteRepo.addCollaborator(note_id, user.id, role);
+        return res.status(201).json(collaborator);
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getSharedNotes = async (req, res, next) => {
+    try {
+        const collaboratorId = req.query.collaborator_id;
+
+        if (!collaboratorId) {
+            return res.status(400).json({ error: "collaborator_id query param is required" });
+        }
+
+        const limit = parseInt(req.query.limit) || 20;
+        const offset = parseInt(req.query.offset) || 0;
+
+        const notes = await noteRepo.getAllNotesByCollaboratorId({ collaboratorId, limit, offset });
+        return res.json(notes);
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getNoteByIdWithRole = async (req, res, next) => {
+    try {
+        const userId = req.query.user_id;
+        if (!userId) {
+            return res.status(400).json({ error: "user_id query param is required" });
+        }
+
+        const note = await noteRepo.getNoteByIdWithRole(req.params.id, userId);
+        if (!note) {
+            return res.status(404).json({ error: "Note not found" });
+        }
+
+        return res.json(note);
+    } catch (error) {
+        next(error);
+    }
+}

@@ -57,6 +57,8 @@ const options = {
                         version: { type: "integer" },
                         created_at: { type: "string", format: "date-time" },
                         updated_at: { type: "string", format: "date-time" },
+                        collaborators: { type: "integer" },
+                        user_role: { type: "string" },
                     },
                 },
                 CreateNoteRequest: {
@@ -73,6 +75,14 @@ const options = {
                     properties: {
                         title: { type: "string", example: "Updated Meeting Notes" },
                         content: { type: "string", example: "Revised project timeline..." },
+                    },
+                },
+                AddCollaboratorRequest: {
+                    type: "object",
+                    required: ["email"],
+                    properties: {
+                        email: { type: "string", format: "email", example: "franciscus@mail.com" },
+                        role: { type: "string", enum: ["editor", "viewer"], example: "editor" },
                     },
                 },
                 Error: {
