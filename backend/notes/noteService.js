@@ -59,19 +59,28 @@ exports.getAllNotes = async (req, res, next) => {
 
 exports.updateNote = async (req, res, next) => {
     try {
-        const { title, content } = req.body;
+        const noteId = req.params.id;
+        if (!noteId) {
+            return res.status(400).json({ error: "id path param is required" });
+        }
 
-        const note = await noteRepo.updateNote(req.params.id, { title, content });
-
+        const { user_id, title, content } = req.body;
+        const note = await noteRepo.getNoteByIdWithRole(req.params.id, user_id);
         if (!note) {
             return res.status(404).json({ error: "Note not found" });
         }
 
-        return res.json(note);
+        if (note.user_role != 'owner' && note.user_role != 'editor') {
+            return res.status(403).json({ error: "You don't have an access to edit this note" });
+        }
+
+        const updateRes = await noteRepo.updateNote(noteId, { title, content });
+        await noteRepo.addNoteVersion(noteId, { content: updateRes.content, version: updateRes.version, user_id });
+        return res.json(updateRes);
     } catch (error) {
         next(error);
     }
-};
+}
 
 exports.deleteNote = async (req, res, next) => {
     try {

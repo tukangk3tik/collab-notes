@@ -91,3 +91,13 @@ exports.getNoteByIdWithRole = async (id, userId) => {
     `, [id, userId]);
     return result.rows[0] || null;
 };
+
+exports.addNoteVersion = async (id, { content, version, user_id, isCheckPoint = false }) => {
+    const result = await pool.query(
+        `INSERT INTO note_versions (note_id, content, version, is_checkpoint, created_by)
+     VALUES ($1, $2, $3, $4, $5)
+     RETURNING *`,
+        [id, content, version, isCheckPoint, user_id]
+    );
+    return result.rows[0] || null;
+};

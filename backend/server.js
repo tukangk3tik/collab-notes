@@ -1,5 +1,6 @@
 require('dotenv').config();
 
+const http = require("http");
 const express = require("express");
 const cors = require("cors");
 const swaggerUi = require("swagger-ui-express");
@@ -10,9 +11,11 @@ const authService = require("./user/authService");
 const validateMiddleware = require("./common/middleware/validation-middleware");
 const postNoteSchema = require("./notes/schema/post-note.schema");
 const postCollaboratorSchema = require("./notes/schema/post-collaborator.schema");
+const updateNoteSchema = require('./notes/schema/update-note.schema');
+const setupWebSocket = require('./websocket');
 
 const app = express();
-const appPort = 3001;
+const appPort = process.env.APP_PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
@@ -28,7 +31,9 @@ app.get("/", (_, res) => {
 app.post("/notes", validateMiddleware(postNoteSchema), noteService.createNote);
 app.get("/notes", noteService.getAllNotes);
 app.get("/notes/:id", noteService.getNoteByIdWithRole);
+app.put("/notes/:id", validateMiddleware(updateNoteSchema), noteService.updateNote);
 app.delete("/notes/:id", noteService.deleteNote);
+
 app.post("/notes/:id/collaborators", validateMiddleware(postCollaboratorSchema), noteService.addCollaborator);
 app.get("/shared-notes", noteService.getSharedNotes);
 
@@ -55,7 +60,11 @@ app.use((err, _req, res, _next) => {
     res.status(500).json({ error: "Internal server error" });
 });
 
-app.listen(appPort, () => {
+const server = http.createServer(app);
+
+setupWebSocket(server);
+
+server.listen(appPort, () => {
     console.log(`Timezone set: ${process.env.TZ}`);
     console.log(`Server started on port: ${appPort}`);
 });
