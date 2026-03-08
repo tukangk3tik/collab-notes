@@ -2,7 +2,7 @@ import { client } from "@/services/apiService"
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
 import { useAuth } from "./AuthContext"
 import { noteService } from '@/services/noteAPI'
-import type { PostNote } from "@/types/post-note"
+import type { PostNote, UpdateNote } from "@/types/post-note"
 import type { Note } from "@/types/note"
 
 interface NotesContextType {
@@ -10,7 +10,7 @@ interface NotesContextType {
     loading: boolean
     error: string | null
     createNote: (postNote: PostNote) => Promise<void>
-    updateNote: (id: string, title: string, content: string) => void
+    updateNote: (id: string, payload: UpdateNote) => Promise<void>
     updateNoteAsCollaborator: (id: string, content: string) => void
     deleteNote: (id: string) => void
 }
@@ -55,11 +55,11 @@ export function NotesProvider({ children }: { children: ReactNode }) {
         }
     }
 
-    const updateNote = async (id: string, title: string, content: string) => {
+    const updateNote = async (id: string, payload: UpdateNote) => {
         try {
             const res = await client(`/notes/${id}`, {
                 method: 'PUT',
-                body: { title, content },
+                body: payload,
             })
             setNotes(notes?.map((note) => note.id === id ? res : note))
         } catch (error) {
